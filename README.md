@@ -169,7 +169,7 @@ button:hover{ opacity:0.95; transform:scale(1.03); }
 
 
 table{
-  width:100%; border-collapse:collapse; font-size:18px;
+  width:120%; border-collapse:collapse; font-size:18px;
   border-radius:12px; overflow:hidden; box-shadow:0 6px 12px rgba(0,0,0,.04);
 }
 th,td{ padding:5px 5px; text-align:center; border-bottom:1px solid #000000; cursor:default; }
