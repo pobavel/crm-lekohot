@@ -1,5 +1,3 @@
-
-מערכת לניהול לקוחות אונליין
 <!DOCTYPE html>
 <html lang="he">
 <head>
