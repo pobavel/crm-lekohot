@@ -69,7 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
   --accent:#0F0880; 
   --dark:#1A1A1A; 
   --hover-row:#FFFFFF;
-  --maxw:1650px;
+  --maxw:2000px;
 }
 body{
   font-family:'Segoe UI',Tahoma,sans-serif;
@@ -138,7 +138,7 @@ main.wrapper{
 .card{ background:#82D5ED; padding:15px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
 
 input, textarea, select {
-  width: 140%;              /* תופס את רוחב הקונטיינר */
+  width: 100%;              /* תופס את רוחב הקונטיינר */
   padding: 6px 8px;         /* רווח פנימי נוח לקריאה */
   margin: 4px 0;            /* רווח בין השדות */
   font-size: 16px;          /* גודל טקסט אחיד */
