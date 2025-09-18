@@ -69,7 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
   --accent:#0F0880; 
   --dark:#1A1A1A; 
   --hover-row:#FFFFFF;
-  --maxw:2000px;
+  --maxw:1650px;
 }
 body{
   font-family:'Segoe UI',Tahoma,sans-serif;
