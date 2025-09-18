@@ -138,7 +138,7 @@ main.wrapper{
 .card{ background:#82D5ED; padding:15px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
 
 input, textarea, select {
-  width: 100%;              /* תופס את רוחב הקונטיינר */
+  width: 140%;              /* תופס את רוחב הקונטיינר */
   padding: 6px 8px;         /* רווח פנימי נוח לקריאה */
   margin: 4px 0;            /* רווח בין השדות */
   font-size: 16px;          /* גודל טקסט אחיד */
@@ -169,7 +169,7 @@ button:hover{ opacity:0.95; transform:scale(1.03); }
 
 
 table{
-  width:120%; border-collapse:collapse; font-size:18px;
+  width:100%; border-collapse:collapse; font-size:18px;
   border-radius:12px; overflow:hidden; box-shadow:0 6px 12px rgba(0,0,0,.04);
 }
 th,td{ padding:5px 5px; text-align:center; border-bottom:1px solid #000000; cursor:default; }
