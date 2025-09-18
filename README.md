@@ -132,7 +132,7 @@ main.wrapper{
 
 }
 .container{ display:flex; gap:18px; align-items:flex-start; }
-.right-panel{ width:700px; display:flex; flex-direction:column; gap:14px; }
+.right-panel{ width:300px; display:flex; flex-direction:column; gap:14px; }
 .tables-box{ flex:1; display:flex; flex-direction:column; gap:14px; }
 
 .card{ background:#82D5ED; padding:15px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
