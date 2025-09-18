@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ניהול לקוחות זומבים — מקצועי</title>
+<style>
+:root{
+  --primary:#0b63a8; 
+  --accent:#56CFE1; 
+  --dark:#1A1A1A; 
+  --hover-row:#f1f8ff;
+  --maxw:1650px;
+}
+body{
+  font-family:'Segoe UI',Tahoma,sans-serif;
+  margin:0; padding:0; direction:rtl;
+  background:linear-gradient(180deg,#f0f4f8,#e8f5e9);
+  color:#111;
+}
+header{
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  color:white;
+  padding:16px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 6px rgba(0,0,0,.12);
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+.logo{
+  font-size:35px;
+  font-weight:800;
+  text-shadow:1px 1px 2px rgba(0,0,0,.15);
+}
+nav ul{
+  list-style:none; margin:0; padding:0; display:flex; gap:2px; align-items:center;
+}
+nav a{
+  color:white; text-decoration:none; padding:8px 12px; border-radius:6px; transition:background .18s; font-size:18px;
+}
+nav a:hover{ background:rgba(255,255,255,0.12); }
+nav li{ position:relative; }
+nav li ul{
+  display:none;
+  position:absolute;
+  top:36px;
+  right:0;
+  background:var(--accent);
+  padding:8px 0;
+  border-radius:4px;
+  min-width:180px;
+}
+nav li:hover ul{ display:block; }
+nav li ul a{ display:block; padding:8px 14px; color:#fff; }
+
+main.wrapper{
+  max-width:var(--maxw);
+  margin:20px auto;
+  padding:20px;
+  gap:18px;
+  display:flex;
+  flex-direction:column;
+  min-height:calc(100vh - 220px);
+}
+.container{ display:flex; gap:18px; align-items:flex-start; }
+.right-panel{ width:280px; display:flex; flex-direction:column; gap:14px; }
+.tables-box{ flex:1; display:flex; flex-direction:column; gap:14px; }
+
+.card{ background:#fff; padding:16px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+
+input,textarea,select{
+  width:100%; padding:8px 10px; margin:4px 0; font-size:16px;
+  border-radius:6px; border:1px solid #d0d7de; box-sizing:border-box;
+}
+button{
+  padding:8px 12px; border:none; border-radius:8px; cursor:pointer;
+  font-size:15px; transition:0.2s; white-space:nowrap;
+}
+button:hover{ opacity:0.85; }
+
+.save{ background:#49C449; color:white; }
+.archive{ background:#EBCF6E; color:white; }
+.delete{ background:#F52116; color:white; }
+.edit{ background:#5bc0de; color:white; }
+.search-btn{ background:#337ab7; color:white; width:100%; }
+.reset-search{ background:#777; color:#fff; margin-top:6px; width:100%; }
+
+table{
+  width:100%; border-collapse:collapse; font-size:16px;
+  border-radius:8px; overflow:hidden; box-shadow:0 6px 12px rgba(0,0,0,.04);
+}
+th,td{ padding:10px 12px; text-align:center; border-bottom:1px solid #ccc; cursor:default; }
+thead th{ background:linear-gradient(90deg,#f7fbfc,#eef8fa); font-weight:700; cursor:pointer; }
+tbody tr:hover{ background:var(--hover-row); }
+tr.empty td{ text-align:center; color:#666; padding:18px; }
+
+table.inactive thead th{ background:#d9534f; color:#fff; }
+table.archive thead th{ background:#f0ad4e; color:#fff; }
+
+.status-paid{ color:#2e8b57; font-weight:600; }
+.status-unpaid{ color:#d9534f; font-weight:600; }
+.status-trial{ color:#0275d8; font-weight:600; }
+.status-blocked{ color:#555; font-weight:600; }
+
+tr[data-status="שילם"]{ background:#e0f7e0; }
+tr[data-status="לא שילם"]{ background:#fde0e0; }
+tr[data-status="מתנסה"]{ background:#e0f0fd; }
+tr[data-status="חסום"]{ background:#f0f0f0; color:#555; }
+
+#toast{
+  position:fixed; top:30px; right:50%; transform:translateX(50%);
+  background:rgba(0,0,0,.85); color:#fff; padding:12px 20px; border-radius:6px;
+  opacity:0; pointer-events:none; transition:opacity .4s, transform .4s; z-index:2000;
+  display:flex; align-items:center; gap:8px;
+}
+#toast.show{ opacity:1; transform:translateX(50%) translateY(0); }
+
+.pagination-buttons{ display:flex; justify-content:center; padding:12px 0; gap:6px; flex-wrap:wrap; }
+.pagination-buttons button{ min-width:40px; }
+
+.actions{ display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
+.actions button{ flex:1; min-width:80px; }
+
+#archiveTable, #archiveTable td, #archiveTable th{ color:#222; font-size:18px; }
+#archiveTable tbody tr{ background:#f8f8f8; }
+
+.footer{ background:var(--dark); color:#fff; padding:50px 20px; text-align:center; margin-top:30px; }
+.footer a{ color:#fff; text-decoration:none; margin:0 8px; }
+
+@media(max-width:900px){ .container{ flex-direction:column; } .right-panel{ width:100%; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ניהול לקוחות זומבים</div>
+  <nav>
+    <ul>
+      <li><a href="#">בית</a></li>
+      <li><a href="#">לקוחות ▾</a>
+        <ul>
+          <li><a href="#">לקוחות פעילים</a></li>
+          <li><a href="#">לקוחות לא פעילים</a></li>
+          <li><a href="#">ארכיון</a></li>
+        </ul>
+      </li>
+      <li><a href="#">דוחות ▾</a>
+        <ul>
+          <li><a href="#">דוח חודשי</a></li>
+          <li><a href="#">דוח שנתי</a></li>
+        </ul>
+      </li>
+      <li><a href="#">הגדרות</a></li>
+      <li><a href="#">צור קשר</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="wrapper">
+  <h1 id="title" style="text-align:right; margin:0 6px 6px 0; color:var(--primary); font-size:22px;"></h1>
+  <div class="container">
+    <aside class="right-panel">
+      <div class="card">
+        <input type="text" id="searchInput" placeholder="חיפוש לקוחות לפי שם, נייד או אימייל" oninput="performSearch()" autofocus>
+        <button class="search-btn" onclick="performSearch()">חפש</button>
+        <button class="reset-search" onclick="resetSearch()">איפוס חיפוש</button>
+      </div>
+      <div class="card">
+        <h3>הוספת לקוח</h3>
+        <input type="text" id="name" placeholder="שם מלא">
+        <input type="email" id="email" placeholder="אימייל">
+        <input type="text" id="mobile" placeholder="מספר נייד">
+        <input type="number" step="0.01" id="amount" placeholder="סכום כסף">
+        <textarea id="comment" placeholder="הערה" rows="3"></textarea>
+        <label>סטטוס לקוח:</label>
+        <select id="status">
+          <option>שילם</option>
+          <option>מתנסה</option>
+          <option>לא שילם</option>
+          <option>חסום</option>
+        </select>
+        <div class="actions" style="margin-top:8px;">
+          <button class="save" onclick="addCustomer()">שמור</button>
+          <button class="archive" onclick="archiveAllCustomers()">ארכיון הכל</button>
+          <button class="delete" onclick="deleteSelectedCustomers()">מחק נבחרים</button>
+          
+        </div>
+      </div>
+    </aside>
+    <section class="tables-box">
+      <div class="card"><h2>לקוחות פעילים</h2>
+        <div style="overflow:auto; max-height:350px;">
+          <table id="customerTable" class="active"></table>
+        </div>
+      </div>
+      <div class="card"><h2>לקוחות לא פעילים</h2>
+        <div style="overflow:auto; max-height:350px;">
+          <table id="inactiveTable" class="inactive"></table>
+        </div>
+      </div>
+      <div class="card"><h2>ארכיון</h2>
+        <div style="overflow:auto; max-height:350px;">
+          <table id="archiveTable" class="archive"></table>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<footer class="footer">
+  <div><a href="#">בית</a><a href="#">לקוחות</a><a href="#">צור קשר</a></div>
+  <div style="font-size:13px; opacity:0.9;">© 2025 ניהול לקוחות זומבים. כל הזכויות שמורות.</div>
+</footer>
+
+<script>
+// ====== Utils ======
+const DELETE_PASSWORD="5135";
+function generateUUID(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});}
+function toast(msg,type="info"){ 
+  const t=document.getElementById('toast');
+  const icon= type==="success"?"✔":type==="error"?"✖":"ℹ";
+  t.innerHTML=`<span>${icon}</span>${msg}`;
+  t.style.background= type==="error" ? "#d9534f" : type==="success" ? "#2e8b57" : "rgba(0,0,0,.8)";
+  t.className="show";
+  setTimeout(()=>t.className="",3000);
+}
+function saveLocal(){
+  localStorage.setItem('customers',JSON.stringify(customers));
+  localStorage.setItem('inactive',JSON.stringify(inactive));
+  localStorage.setItem('archive',JSON.stringify(archive));
+  updateTitle();
+}
+function updateTitle(){
+  document.getElementById('title').textContent=`ניהול לקוחות זומבים — ${customers.length} לקוחות פעילים`;
+}
+function formatAmount(a){
+  const n=parseFloat(a); return isNaN(n)?"":n.toLocaleString('he-IL',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ====== Data ======
+let customers=JSON.parse(localStorage.getItem('customers'))||[];
+let inactive=JSON.parse(localStorage.getItem('inactive'))||[];
+let archive=JSON.parse(localStorage.getItem('archive'))||[];
+let currentPage={customers:0,inactive:0,archive:0};
+const PAGE_SIZE=5;
+
+// ====== Add ======
+function addCustomer(){
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const mobile=document.getElementById('mobile').value.trim();
+  const amount=parseFloat(document.getElementById('amount').value);
+  const comment=document.getElementById('comment').value.trim();
+  const status=document.getElementById('status').value;
+  if(!name||!email||!mobile||isNaN(amount)){ toast("מלא את כל השדות","error"); return; }
+  if(customers.some(c=>c.name===name && c.mobile===mobile)){ toast("לקוח קיים","error"); return; }
+  customers.push({id:generateUUID(),name,email,mobile,amount,comment,status});
+  saveLocal(); renderAll();
+  toast("לקוח נוסף בהצלחה","success");
+  ["name","email","mobile","amount","comment"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById('name').focus();
+}
+
+// ====== Render ======
+function tableIdFromType(type){ return type==="customers"?"customerTable":type==="inactive"?"inactiveTable":"archiveTable"; }
+
+function renderAll(){
+  renderTable('customerTable',customers,'customers',currentPage.customers);
+  renderTable('inactiveTable',inactive,'inactive',currentPage.inactive);
+  renderTable('archiveTable',archive,'archive',currentPage.archive);
+  updateTitle();
+}
+
+function renderTable(tableId,data,type,page){
+  const table=document.getElementById(tableId);
+  table.innerHTML="";
+  if(!data.length){ table.innerHTML='<tr class="empty"><td colspan="9">אין נתונים</td></tr>'; return; }
+  data.sort((a,b)=>a.name.localeCompare(b.name,'he'));
+  const start=page*PAGE_SIZE;
+  const pageData=data.slice(start,start+PAGE_SIZE);
+
+  table.innerHTML=`<thead><tr>
+    <th><input type="checkbox" onclick="toggleSelectAll(this,'${tableId}')"/></th>
+    <th>#</th><th>שם מלא</th><th>אימייל</th><th>נייד</th><th>סכום</th><th>הערה</th><th>סטטוס</th><th>פעולות</th>
+  </tr></thead><tbody></tbody>`;
+
+  const tbody=table.querySelector('tbody');
+
+  pageData.forEach((c,i)=>{
+    const abs=start+i;
+    const tr=document.createElement('tr');
+    tr.setAttribute("data-id", c.id);
+    tr.setAttribute("data-status",c.status);
+    const statusClass=c.status==="שילם"?"status-paid":c.status==="לא שילם"?"status-unpaid":c.status==="מתנסה"?"status-trial":"status-blocked";
+    tr.innerHTML=`<td><input type="checkbox" class="row-checkbox" data-id="${c.id}" data-type="${type}"></td>
+      <td>${abs+1}</td><td>${c.name}</td><td>${c.email}</td><td>${c.mobile}</td><td>${formatAmount(c.amount)}</td>
+      <td>${c.comment||''}</td><td class="${statusClass}">${c.status}</td><td><div class="actions"></div></td>`;
+    const actions=tr.querySelector('.actions');
+    if(type==="customers"){ actions.innerHTML=`
+      <button class="edit" onclick="enableInlineEdit('customers','${c.id}')">ערוך</button>
+      <button class="archive" onclick="moveToArchive('${c.id}')">ארכיון</button>
+      <button class="delete" onclick="deleteCustomer('${c.id}')">מחק</button>
+      <button onclick="moveToInactive('${c.id}')">לא פעיל</button>`; }
+    if(type==="inactive"){ actions.innerHTML=`
+      <button class="edit" onclick="enableInlineEdit('inactive','${c.id}')">ערוך</button>
+      <button class="delete" onclick="deleteInactive('${c.id}')">מחק</button>
+      <button onclick="moveToCustomersFromInactive('${c.id}')">חזור לפעילים</button>`; }
+    if(type==="archive"){ actions.innerHTML=`
+      <button class="edit" onclick="enableInlineEdit('archive','${c.id}')">ערוך</button>
+      <button class="delete" onclick="deleteArchive('${c.id}')">מחק</button>
+      <button onclick="moveToCustomersFromArchive('${c.id}')">חזור לפעילים</button>`; }
+    tbody.appendChild(tr);
+  });
+
+  if(data.length>PAGE_SIZE){ 
+    const totalPages=Math.ceil(data.length/PAGE_SIZE);
+    let buttons=`<div class="pagination-buttons">`;
+    for(let i=0;i<totalPages;i++){
+      buttons+=`<button onclick="goToPage('${type}',${i})" ${i===page?'style="font-weight:bold;background:#ccc;"':''}>${i+1}</button>`;
+    }
+    buttons+=`</div>`;
+    tbody.innerHTML+=`<tr><td colspan="9">${buttons}</td></tr>`;
+  }
+}
+
+// ====== Inline Edit ======
+function enableInlineEdit(type,id){
+  let arr = type==="customers"?customers:type==="inactive"?inactive:archive;
+  const idx=arr.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  const table=document.getElementById(tableIdFromType(type));
+  const row=table.querySelector(`tr[data-id="${id}"]`);
+  const c = arr[idx];
+  row.innerHTML = `
+    <td></td><td>${idx+1}</td>
+    <td><input type="text" value="${c.name}" /></td>
+    <td><input type="email" value="${c.email}" /></td>
+    <td><input type="text" value="${c.mobile}" /></td>
+    <td><input type="number" step="0.01" value="${c.amount}" /></td>
+    <td><textarea>${c.comment||""}</textarea></td>
+    <td>
+      <select>
+        <option ${c.status==="שילם"?"selected":""}>שילם</option>
+        <option ${c.status==="מתנסה"?"selected":""}>מתנסה</option>
+        <option ${c.status==="לא שילם"?"selected":""}>לא שילם</option>
+        <option ${c.status==="חסום"?"selected":""}>חסום</option>
+      </select>
+    </td>
+    <td><button class="save" onclick="saveInlineEdit('${type}','${id}')">שמור</button></td>`;
+}
+
+function saveInlineEdit(type,id){
+  let arr = type==="customers"?customers:type==="inactive"?inactive:archive;
+  const idx=arr.findIndex(c=>c.id===id);
+  if(idx<0) return;
+  const table=document.getElementById(tableIdFromType(type));
+  const row=table.querySelector(`tr[data-id="${id}"]`);
+  const inputs=row.querySelectorAll('input,textarea,select');
+  arr[idx].name=inputs[0].value.trim();
+  arr[idx].email=inputs[1].value.trim();
+  arr[idx].mobile=inputs[2].value.trim();
+  arr[idx].amount=parseFloat(inputs[3].value)||0;
+  arr[idx].comment=inputs[4].value.trim();
+  arr[idx].status=inputs[5].value;
+  saveLocal(); renderAll(); toast("הלקוח עודכן","success");
+}
+
+// ====== Move / Archive / Delete ======
+function moveToArchive(id){ customers=customers.filter(c=>{if(c.id===id){archive.push(c);} return c.id!==id;}); saveLocal(); renderAll(); }
+function moveToInactive(id){ customers=customers.filter(c=>{if(c.id===id){inactive.push(c);} return c.id!==id;}); saveLocal(); renderAll(); }
+function moveToCustomersFromInactive(id){ inactive=inactive.filter(c=>{if(c.id===id){customers.push(c);} return c.id!==id;}); saveLocal(); renderAll(); }
+function moveToCustomersFromArchive(id){ archive=archive.filter(c=>{if(c.id===id){customers.push(c);} return c.id!==id;}); saveLocal(); renderAll(); }
+
+function deleteCustomer(id){ customers=customers.filter(c=>c.id!==id); saveLocal(); renderAll(); }
+function deleteInactive(id){ inactive=inactive.filter(c=>c.id!==id); saveLocal(); renderAll(); }
+function deleteArchive(id){ archive=archive.filter(c=>c.id!==id); saveLocal(); renderAll(); }
+function archiveAllCustomers(){ customers.forEach(c=>archive.push(c)); customers=[]; saveLocal(); renderAll(); toast("כל הלקוחות הופנו לארכיון","success"); }
+
+// ====== Search ======
+function performSearch(){
+  const term=document.getElementById('searchInput').value.trim().toLowerCase();
+  if(!term){ renderAll(); return; }
+  renderTable('customerTable',customers.filter(c=>c.name.toLowerCase().includes(term)||c.email.toLowerCase().includes(term)||c.mobile.includes(term)),'customers',0);
+  renderTable('inactiveTable',inactive.filter(c=>c.name.toLowerCase().includes(term)||c.email.toLowerCase().includes(term)||c.mobile.includes(term)),'inactive',0);
+  renderTable('archiveTable',archive.filter(c=>c.name.toLowerCase().includes(term)||c.email.toLowerCase().includes(term)||c.mobile.includes(term)),'archive',0);
+}
+function resetSearch(){ document.getElementById('searchInput').value=""; renderAll(); }
+
+// ====== Pagination ======
+function goToPage(type,page){ currentPage[type]=page; renderAll(); }
+
+// ====== Checkbox select all ======
+function toggleSelectAll(master,tableId){ const checked=master.checked; document.querySelectorAll(`#${tableId} .row-checkbox`).forEach(cb=>cb.checked=checked); }
+
+// ====== Delete selected / all ======
+function deleteSelectedCustomers(){
+  const selected=document.querySelectorAll('.row-checkbox:checked');
+  if(!selected.length){ toast("לא נבחרו לקוחות","info"); return; }
+  if(prompt("סיסמא למחיקה")!==DELETE_PASSWORD){ return; }
+  selected.forEach(cb=>{
+    const id=cb.dataset.id;
+    const type=cb.dataset.type;
+    if(type==="customers"){ customers=customers.filter(c=>c.id!==id); }
+    if(type==="inactive"){ inactive=inactive.filter(c=>c.id!==id); }
+    if(type==="archive"){ archive=archive.filter(c=>c.id!==id); }
+  });
+  saveLocal(); renderAll(); toast("נמחקו הלקוחות שנבחרו","success");
+}
+function deleteAllCustomers(){
+  if(prompt("סיסמא למחיקה של כל הלקוחות")!==DELETE_PASSWORD){ return; }
+  customers=[]; inactive=[]; archive=[];
+  saveLocal(); renderAll(); toast("כל הלקוחות נמחקו","success");
+}
+
+// ====== Init ======
+renderAll();
+</script>
+</body>
+</html>
